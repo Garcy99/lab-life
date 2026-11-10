@@ -1,0 +1,2 @@
+[functions.lab-life-api]
+verify_jwt = false
