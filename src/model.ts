@@ -4,8 +4,8 @@ export type Hours = { open: string; close: string; enabled: boolean };
 export type Submission = { id: string; title: string; date: string; time: string; type: 'PARTIAL'|'FINAL'|'OTHER'; course: string; completed: boolean; description: string; labs?: Lab[] };
 export type Closure = { id: string; title: string; start: string; end: string; labs: Lab[]; description: string };
 export type Poster = { id: string; title: string; subtitle: string; body: string; image: string; start: string; end: string; enabled: boolean; labs?: Lab[] };
-export type Appearance = {buttonRadius:number;accent:'sky'|'navy';posterTone:'ice'|'navy';font:'sans'|'editorial';tagline:string;logo:string};
-export const DEFAULT_APPEARANCE:Appearance={buttonRadius:12,accent:'navy',posterTone:'ice',font:'sans',tagline:'SPACE TO CREATE. ROOM TO GROW.',logo:''};
+export type Appearance = {buttonRadius:number;accent:'sky'|'navy';posterTone:'ice'|'navy';font:'sans'|'editorial'|'montserrat';tagline:string;logo:string;closureColor?:string;closedDayColor?:string};
+export const DEFAULT_APPEARANCE:Appearance={buttonRadius:12,accent:'navy',posterTone:'ice',font:'sans',tagline:'SPACE TO CREATE. ROOM TO GROW.',logo:'',closureColor:'#FDE8E7',closedDayColor:'#EEEEEE'};
 export type ScreenSettings={labs:Lab[];layout:'balanced'|'information'|'poster';showSubmissions:boolean;showClosures:boolean;showCalendar:boolean;showLabStatus:boolean;textScale:'normal'|'large';rotation:number};
 export type ScreenProfile={id:string;name:string;settings:ScreenSettings;enabled:boolean;lastSeen:string|null};
 export const DEFAULT_SCREEN:ScreenSettings={labs:[...LABS],layout:'balanced',showSubmissions:true,showClosures:true,showCalendar:true,showLabStatus:true,textScale:'normal',rotation:15};
@@ -55,7 +55,7 @@ export function validateContent(v:unknown):Content {
   if(!c||c.version!==2||!str(c.campus,100)||!str(c.timezone,100)||!Number.isInteger(c.rotation)||c.rotation<8||c.rotation>120)throw Error('Invalid display settings.');
   try{new Intl.DateTimeFormat('en',{timeZone:c.timezone}).format()}catch{throw Error('Choose a valid timezone.')}
   if(!c.defaults||!['due','close','reopen'].every(k=>time(c.defaults[k as keyof typeof c.defaults])))throw Error('Default times are invalid.');
-  if(c.appearance){const a=c.appearance;if(!Number.isInteger(a.buttonRadius)||a.buttonRadius<0||a.buttonRadius>28||!['sky','navy'].includes(a.accent)||!['ice','navy'].includes(a.posterTone)||!['sans','editorial'].includes(a.font)||!str(a.tagline,120)||!str(a.logo,100)||!/^([a-zA-Z0-9-]+\.(png|jpeg|webp))?$/.test(a.logo))throw Error('Invalid appearance settings.');}
+  if(c.appearance){const a=c.appearance;if(!Number.isInteger(a.buttonRadius)||a.buttonRadius<0||a.buttonRadius>28||!['sky','navy'].includes(a.accent)||!['ice','navy'].includes(a.posterTone)||!['sans','editorial','montserrat'].includes(a.font)||!str(a.tagline,120)||!str(a.logo,100)||!/^([a-zA-Z0-9-]+\.(png|jpeg|webp))?$/.test(a.logo))throw Error('Invalid appearance settings.');for(const color of [a.closureColor,a.closedDayColor])if(color!==undefined&&!/^#[0-9a-fA-F]{6}$/.test(color))throw Error('Choose a valid calendar colour.');}
   if(!c.hours||!LABS.every(l=>Array.isArray(c.hours[l])&&c.hours[l].length===7&&c.hours[l].every(h=>typeof h.enabled==='boolean'&&time(h.open)&&time(h.close)&&(!h.enabled||h.close>h.open))))throw Error('Opening hours must close after opening on the same day.');
   const ids=new Set();
   for(const e of [...(c.submissions||[]),...(c.posters||[])])if(e.labs!==undefined&&(!Array.isArray(e.labs)||!e.labs.every(l=>LABS.includes(l))||new Set(e.labs).size!==e.labs.length))throw Error('Choose valid target laboratories.');
@@ -64,4 +64,18 @@ export function validateContent(v:unknown):Content {
   for(const e of c.closures){if(!Number.isFinite(instant(e.start,c.timezone))||!Number.isFinite(instant(e.end,c.timezone))||instant(e.end,c.timezone)<=instant(e.start,c.timezone)||!Array.isArray(e.labs)||!e.labs.length||!e.labs.every(l=>LABS.includes(l))||!str(e.description,4000))throw Error('Choose affected labs and a reopening time after the closure starts.')}
   for(const p of c.posters){if(!str(p.subtitle,200)||!str(p.body,1200)||!str(p.image,100)||!/^([a-zA-Z0-9-]+\.(png|jpeg|webp))?$/.test(p.image)||typeof p.enabled!=='boolean'||(p.start&&!Number.isFinite(instant(p.start,c.timezone)))||(p.end&&!Number.isFinite(instant(p.end,c.timezone)))||(p.start&&p.end&&instant(p.end,c.timezone)<=instant(p.start,c.timezone)))throw Error('Invalid poster dates or image.')}
   if(JSON.stringify(c).length>800000)throw Error('Backup is too large.');return c;
+}
+
+// Local calendar dates avoid the browser's timezone and 23/25-hour DST days.
+export function shiftDate(date:string,days:number){const d=new Date(date+'T12:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10)}
+export function openingWindows(lab:Lab,c:Content,date:string):Hours[]{
+ const weekday=(new Date(date+'T12:00Z').getUTCDay()+6)%7,h=c.hours[lab][weekday];if(!h.enabled)return [];
+ const minutes=(t:string)=>Number(t.slice(0,2))*60+Number(t.slice(3,5));
+ let windows=[[minutes(h.open),minutes(h.close)]];
+ for(const closure of c.closures.filter(e=>e.labs.includes(lab)&&e.start<date+'T24:00'&&e.end>date+'T00:00')){
+  const start=closure.start.slice(0,10)<date?0:minutes(closure.start.slice(11)),end=closure.end.slice(0,10)>date?1440:minutes(closure.end.slice(11));
+  windows=windows.flatMap(([a,b])=>end<=a||start>=b?[[a,b]]:[[a,Math.max(a,start)],[Math.min(b,end),b]].filter(([x,y])=>x<y));
+ }
+ const time=(n:number)=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+ return windows.map(([a,b])=>({enabled:true,open:time(a),close:time(b)}));
 }
