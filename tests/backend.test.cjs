@@ -121,6 +121,12 @@ async function main(){
  await call(`media?board=${id}&screen=${screen}&image=fab.png`,'GET',{token:screenToken});
  await call(`media?board=${id}&screen=${screen}&image=logo.png`,'GET',{token:screenToken});
  await call(`media?board=${id}&screen=${screen}&image=fashion.png`,'GET',{token:screenToken,expected:403});
+ files.set(id+'/screen-logo.png',new Blob(['screen-logo'],{type:'image/png'}));
+ const branded={...settings,logo:'screen-logo.png',splitProgrammes:true,programmes:['BAS','BID']};
+ await call('screens','PUT',{token:'member',body:{id,screen,name:'Branded FabLab',settings:branded,enabled:true}});
+ const brandedSnapshot=await(await call(displayRoute,'GET',{token:screenToken})).json();eq(brandedSnapshot.content.appearance.logo,'screen-logo.png');eq(brandedSnapshot.screen.settings.splitProgrammes,true);
+ await call(`media?board=${id}&screen=${screen}&image=screen-logo.png`,'GET',{token:screenToken});
+ await call(`media?board=${id}&screen=${screen}&image=logo.png`,'GET',{token:screenToken,expected:403});
  await call('screens','PUT',{token:'member',body:{id,screen,name:'Disabled',settings,enabled:false}});
  await call(displayRoute,'GET',{token:screenToken,expected:403});
  await call('screens','PUT',{token:'member',body:{id,screen,name:'Enabled',settings,enabled:true}});

@@ -69,3 +69,11 @@ Nunca incluyas correos reales, contraseñas, enlaces de invitación, tokens de p
 El backend reconoce al owner por la propiedad del tablero almacenada en la base de datos privada. Para una instalación nueva sin tablero, configura `LAB_OWNER_EMAIL` únicamente como secreto del backend en Supabase antes del primer acceso; nunca en el frontend ni en GitHub. La instalación existente no necesita publicar esa dirección.
 
 La URL de Supabase y su clave publishable deben ser accesibles al navegador y no son credenciales administrativas. Los permisos los verifica el backend; no se almacenan claves secret o service_role en el repositorio.
+
+## Programmes and individual screens
+
+Each submission can be assigned to BAS, BID or BIFD. Existing course labels containing these identifiers are recognized automatically. Older submissions without an identifiable programme remain shared so they are not silently lost; assign a programme when editing them.
+
+In **Screens → Configure**, choose the programmes shown on that screen and whether to separate submissions into programme panels. Existing FabLab screens default to BAS/BID panels; Fashion defaults to a single BIFD feed. Building Tech can use either layout. Each screen can upload its own logo; an empty screen logo inherits the campus logo. Screen configuration saves immediately.
+
+Display headings use the selected laboratory names. Opening-hour columns include local dates in DD/MM/YYYY format. The calendar and legend are enlarged. Posters crossfade over 0.8 seconds; reduced-motion preferences disable the animation. Uploaded image changes retain the previous poster while the incoming image loads.
