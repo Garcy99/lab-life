@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
-    "test": "node tests/privacy.test.mjs && node tests/model.test.mjs && node tests/display.test.cjs && node tests/backend.test.cjs"
+    "test": "node tests/privacy.test.mjs && node tests/model.test.mjs && node tests/display.test.cjs && node tests/backend.test.cjs && node tests/poster-slides.test.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.119.0",
@@ -26,3 +26,4 @@
     "vite": "8.3.7"
   }
 }
+

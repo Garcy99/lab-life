@@ -44,3 +44,6 @@ button,.button,.edit,.arrow{border-radius:var(--button-radius,12px)}input,select
 .programme-compact-total{display:none;font-size:10px;color:var(--navy);margin-top:10px}.preview-frame .display-board{height:auto;min-height:720px;overflow:visible}.preview-frame .display-main{flex:0 0 auto}.preview-frame .poster-panel{min-height:100%}
 @media(max-height:800px) and (min-width:1001px){.programme-upcoming{display:none}.programme-compact-total{display:block}.lab-strip{padding:10px 0}.lab-strip>.minor-heading{margin-bottom:6px}.hours-head{margin-bottom:6px}.daily-hours-row{padding:5px 0}.display-footer{height:30px}.display-main{flex:0 0 auto}.display-board{overflow:visible}.programme-panel .countdown-note{min-height:12px}.calendar-expanded .mini-calendar{padding-top:10px}}
 
+/* Decode the incoming image off-screen; retain the displayed image until ready. */
+.poster-slide.preload-slide{opacity:0;visibility:hidden;pointer-events:none;z-index:-1}.poster-slide.current-slide{opacity:1}.poster-slide.previous-slide{pointer-events:none}
+
