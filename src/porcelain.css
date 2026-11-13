@@ -1,0 +1,80 @@
+/* Porcelain: independent, rounded widgets on the A&D neutral canvas. */
+.display-board.fitted-display.porcelain-display{
+ --ink:#141414;--navy:#141414;--line:#e4e1e7;--porcelain-soft:#69656f;--porcelain-radius:clamp(14px,1.6vw,30px);
+ --fit-gap:clamp(8px,calc(var(--u)*.95),20px);
+ font-family:Montserrat,Arial,sans-serif;color:var(--ink);background:#EFEFEF;
+ padding:clamp(12px,1.4vw,28px) clamp(14px,1.8vw,36px) clamp(8px,.7vw,14px);
+ grid-template-rows:minmax(0,.85fr) minmax(0,8.9fr) minmax(0,.25fr);
+}
+.display-board.fitted-display.porcelain-display .display-header{border:0;padding-bottom:calc(var(--fit-gap)*.6);gap:calc(var(--fit-gap)*1.5)}
+.display-board.fitted-display.porcelain-display .display-lab-title h1{color:#141414;font-family:Montserrat,Arial,sans-serif;font-weight:500;letter-spacing:-1px}
+.display-board.fitted-display.porcelain-display .display-lab-title>span,.display-board.fitted-display.porcelain-display .display-date>span{color:var(--porcelain-soft)}
+.display-board.fitted-display.porcelain-display .display-date>b{display:flex;align-items:center;gap:16px;font-weight:400}
+.display-board.fitted-display.porcelain-display .display-clock{font-size:clamp(18px,calc(var(--u)*1.8),36px);font-weight:500;letter-spacing:-.8px}
+.display-board.fitted-display.porcelain-display .display-main{padding-top:0}
+.display-board.fitted-display.porcelain-display .lab-strip{border:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:var(--fit-gap);height:100%}
+.display-board.fitted-display.porcelain-display .opening-widget,
+.display-board.fitted-display.porcelain-display .programme-panel,
+.display-board.fitted-display.porcelain-display .next-submissions-card,
+.display-board.fitted-display.porcelain-display .mini-calendar,
+.display-board.fitted-display.porcelain-display .closure-card{
+ background:#fff;border:0;border-radius:var(--porcelain-radius);box-shadow:0 4px 20px #14141404;padding:var(--fit-gap);
+}
+.display-board.fitted-display.porcelain-display .opening-widget{display:flex;flex-direction:column;justify-content:center;gap:calc(var(--fit-gap)*.7);min-height:0;overflow:hidden}
+.display-board.fitted-display.porcelain-display .opening-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-shrink:0}
+.display-board.fitted-display.porcelain-display .opening-heading>span{font-size:clamp(10px,calc(var(--u)*.85),17px);font-weight:600;letter-spacing:1px;color:var(--porcelain-soft)}
+.display-board.fitted-display.porcelain-display .opening-heading time{font-size:clamp(10px,calc(var(--u)*.8),16px);color:var(--porcelain-soft)}
+.display-board.fitted-display.porcelain-display .opening-labs{display:flex;flex-direction:column;justify-content:center;gap:5px;flex:1;min-height:0;overflow:hidden}
+.display-board.fitted-display.porcelain-display .opening-lab{display:grid;grid-template-columns:minmax(0,.6fr) minmax(0,1.4fr);align-items:center;gap:8px;flex:1;min-height:0}
+.display-board.fitted-display.porcelain-display .opening-lab h3{font-size:clamp(11px,calc(var(--u)*.95),19px);font-weight:500;line-height:1.2;overflow-wrap:anywhere}
+.display-board.fitted-display.porcelain-display .opening-lab>div{font-size:clamp(22px,calc(var(--u)*2.8),56px);font-weight:500;letter-spacing:-1px;line-height:1.05;text-align:right;font-variant-numeric:tabular-nums;overflow:hidden}
+.display-board.fitted-display.porcelain-display .opening-lab [data-ranges]:not([data-ranges="1"]):not([data-ranges="0"]){font-size:clamp(12px,calc(var(--u)*1.4),28px)}
+.display-board.fitted-display.porcelain-display[data-labs="2"] .opening-lab>div{font-size:clamp(16px,calc(var(--u)*1.85),37px)}
+.display-board.fitted-display.porcelain-display[data-labs="3"] .opening-lab>div{font-size:clamp(14px,calc(var(--u)*1.55),31px)}
+.display-board.fitted-display.porcelain-display .countdowns{border:0;gap:var(--fit-gap)}
+.display-board.fitted-display.porcelain-display .programme-panel:first-child{padding:var(--fit-gap);border:0}
+.display-board.fitted-display.porcelain-display .programme-BID{background:#f0eaf6}
+.display-board.fitted-display.porcelain-display .programme-panel>.minor-heading{background:transparent;border:0;padding:0;color:#141414;font-size:clamp(10px,calc(var(--u)*.85),17px)}
+.display-board.fitted-display.porcelain-display .programme-panel>.minor-heading>span{background:transparent;border:0;padding:0;font-weight:600}
+.display-board.fitted-display.porcelain-display .countdown-inner h2{font-family:Montserrat,Arial,sans-serif;font-weight:500;line-height:1.18}
+.display-board.fitted-display.porcelain-display .countdown-figure strong{font-family:Montserrat,Arial,sans-serif;font-weight:500}
+.display-board.fitted-display.porcelain-display .countdown-figure.due-today strong{font-size:clamp(17px,calc(var(--u)*1.8),36px);letter-spacing:-.8px}
+.display-board.fitted-display.porcelain-display .event-type{background:transparent;padding:0;color:var(--porcelain-soft);font-size:clamp(8px,calc(var(--u)*.6),12px)}
+.display-board.fitted-display.porcelain-display .countdown-inner p,.display-board.fitted-display.porcelain-display .countdown-note,.display-board.fitted-display.porcelain-display .countdown-figure>span{color:var(--porcelain-soft)}
+.display-board.fitted-display.porcelain-display .next-submissions-card .minor-heading{color:#141414;font-size:clamp(10px,calc(var(--u)*.9),18px);letter-spacing:0;font-weight:600}
+.display-board.fitted-display.porcelain-display .next-submission-row>b{color:#6c278e;font-weight:500}
+.display-board.fitted-display.porcelain-display .next-submission-row:last-child{border:0}
+.display-board.fitted-display.porcelain-display .next-submission-row small,.display-board.fitted-display.porcelain-display .queue-pages,.display-board.fitted-display.porcelain-display .queue-empty{color:var(--porcelain-soft)}
+.display-board.fitted-display.porcelain-display .mini-calendar{grid-template-rows:auto auto minmax(0,1fr);gap:calc(var(--fit-gap)*.6)}
+.display-board.fitted-display.porcelain-display .mini-calendar>.minor-heading{color:#141414;font-weight:600;letter-spacing:0}
+.display-board.fitted-display.porcelain-display .mini-calendar>.minor-heading b,.display-board.fitted-display.porcelain-display .calendar-week{color:var(--porcelain-soft);font-weight:400}
+.display-board.fitted-display.porcelain-display .calendar-grid{gap:3px}
+.display-board.fitted-display.porcelain-display .calendar-day{border:0;border-radius:clamp(4px,.4vw,8px);background:transparent;box-shadow:none;position:relative;justify-content:center}
+.display-board.fitted-display.porcelain-display .calendar-day.closed-day{background:var(--closed-day-color);box-shadow:none}
+.display-board.fitted-display.porcelain-display .calendar-day.partial-closure-day{background:var(--partial-closure-color);color:#141414;box-shadow:none}
+.display-board.fitted-display.porcelain-display .calendar-day.full-closure-day{background:var(--closure-color);color:#141414;box-shadow:none}
+.display-board.fitted-display.porcelain-display .calendar-day .is-today{background:transparent!important;border:2.5px solid var(--today-color);color:#141414;font-weight:600}
+.display-board.fitted-display.porcelain-display .calendar-day>i{position:absolute;bottom:2px;background:transparent}
+.display-board.fitted-display.porcelain-display .calendar-day>i.has-submission{background:#6c278e}
+.display-board.fitted-display.porcelain-display .calendar-day.muted{color:#8a858f;opacity:.5}
+.display-board.fitted-display.porcelain-display .closure-card{--closure-accent:#69656f;background:#fff;border:0}
+.display-board.fitted-display.porcelain-display .closure-card.partial-closure-card{--closure-accent:#b44d00;background:#fff0e3}
+.display-board.fitted-display.porcelain-display .closure-card.full-closure-card{--closure-accent:#bd2023;background:#ffeaeb}
+.display-board.fitted-display.porcelain-display .closure-card>.minor-heading,.display-board.fitted-display.porcelain-display .closure-status{color:var(--closure-accent)}
+.display-board.fitted-display.porcelain-display .closure-card h2{font-family:Montserrat,Arial,sans-serif;font-weight:500;color:#141414}
+.display-board.fitted-display.porcelain-display .closure-dates>div>span,.display-board.fitted-display.porcelain-display .closure-labs{color:var(--porcelain-soft)}
+.display-board.fitted-display.porcelain-display .closure-dates>div>strong,.display-board.fitted-display.porcelain-display .closure-dates>div>b{color:#141414;font-weight:500}
+.display-board.fitted-display.porcelain-display .poster-panel{border-radius:var(--porcelain-radius);background:#fff;box-shadow:0 4px 20px #14141404}
+.display-board.fitted-display.porcelain-display.tone-navy .poster-panel{background:#141414;color:#efefef}
+.display-board.fitted-display.porcelain-display .display-footer{padding-top:calc(var(--fit-gap)*.3);color:var(--porcelain-soft)}
+.display-board.fitted-display.porcelain-display .connection>i{background:var(--today-color)}
+.preview-frame .display-board.fitted-display.porcelain-display{padding:clamp(10px,1vw,20px)}
+.preview-frame .display-board.fitted-display.porcelain-display .mini-calendar{padding:var(--fit-gap)}
+@container lab-display (max-aspect-ratio:4/5){
+ .display-board.fitted-display.porcelain-display .opening-lab{grid-template-columns:minmax(0,1fr);gap:4px}
+ .display-board.fitted-display.porcelain-display .opening-lab>div{text-align:left;font-size:clamp(18px,4cqw,40px)}
+ .display-board.fitted-display.porcelain-display .opening-heading{align-items:flex-start;flex-direction:column;gap:3px}
+ .display-board.fitted-display.porcelain-display .countdown-figure.due-today strong{font-size:clamp(16px,3cqw,30px)}
+ .display-board.fitted-display.porcelain-display .countdowns{gap:var(--fit-gap)}
+}
+

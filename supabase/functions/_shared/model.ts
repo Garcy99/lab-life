@@ -4,7 +4,7 @@ export type Hours = { open: string; close: string; enabled: boolean };
 export const PROGRAMMES = ['BAS','BID','BIFD'] as const;
 export type Programme=typeof PROGRAMMES[number];
 export type Submission = { id: string; title: string; date: string; time: string; type: 'PARTIAL'|'FINAL'|'OTHER'; course: string; programme?:Programme; completed: boolean; description: string; labs?: Lab[] };
-export type Closure = { id: string; title: string; start: string; end: string; labs: Lab[]; description: string };
+export type Closure = { id: string; title: string; start: string; end: string; labs: Lab[]; description: string; kind?:'partial'|'full' };
 export type Poster = { id: string; title: string; subtitle: string; body: string; image: string; start: string; end: string; enabled: boolean; labs?: Lab[] };
 export type Appearance = {buttonRadius:number;accent:'sky'|'navy';posterTone:'ice'|'navy';font:'sans'|'editorial'|'montserrat';tagline:string;logo:string;closureColor?:string;closedDayColor?:string};
 export const DEFAULT_APPEARANCE:Appearance={buttonRadius:12,accent:'navy',posterTone:'ice',font:'sans',tagline:'SPACE TO CREATE. ROOM TO GROW.',logo:'',closureColor:'#FDE8E7',closedDayColor:'#EEEEEE'};
@@ -30,7 +30,8 @@ export function instant(value:string, timezone:string):number {
 }
 export const due=(s:Submission,c:Content)=>instant(`${s.date}T${s.time||c.defaults.due}`,c.timezone);
 export function countdown(target:number,now=Date.now()) {const ms=target-now;if(ms<0)return {number:'—',unit:'OVERDUE'};const hours=ms/3600000;return hours<24?{number:String(Math.max(1,Math.ceil(hours))),unit:Math.ceil(hours)<=1?'HOUR':'HOURS'}:{number:String(Math.floor(hours/24)),unit:Math.floor(hours/24)===1?'DAY':'DAYS'}}
-export const nextSubmission=(c:Content,now=Date.now())=>c.submissions.filter(s=>!s.completed&&due(s,c)>=now).sort((a,b)=>due(a,c)-due(b,c))[0];
+export function submissionDays(s:Submission,c:Content,now=Date.now()){const today=localParts(new Date(now),c.timezone).date;return Math.round((Date.parse(s.date+'T00:00Z')-Date.parse(today+'T00:00Z'))/86400000)}
+export const nextSubmission=(c:Content,now=Date.now())=>c.submissions.filter(s=>!s.completed&&submissionDays(s,c,now)>=0).sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id))[0];
 export const nextClosure=(c:Content,now=Date.now())=>c.closures.filter(e=>instant(e.end,c.timezone)>now).sort((a,b)=>Number(instant(a.start,c.timezone)>now)-Number(instant(b.start,c.timezone)>now)||instant(a.start,c.timezone)-instant(b.start,c.timezone))[0];
 export function labStatus(lab:Lab,c:Content,now=Date.now()) {
   const periods=c.closures.filter(e=>e.labs.includes(lab)).map(e=>({start:instant(e.start,c.timezone),end:instant(e.end,c.timezone),title:e.title})).sort((a,b)=>a.start-b.start);
@@ -63,7 +64,7 @@ export function validateContent(v:unknown):Content {
   for(const e of [...(c.submissions||[]),...(c.posters||[])])if(e.labs!==undefined&&(!Array.isArray(e.labs)||!e.labs.every(l=>LABS.includes(l))||new Set(e.labs).size!==e.labs.length))throw Error('Choose valid target laboratories.');
   for(const list of [c.submissions,c.closures,c.posters]){if(!Array.isArray(list)||list.length>500)throw Error('Each section supports up to 500 entries.');for(const e of list){if(!str(e.id,80)||!e.id||ids.has(e.id)||!str(e.title)||!e.title.trim())throw Error('Every item needs a unique ID and title.');ids.add(e.id)}}
   for(const s of c.submissions){if(s.programme!==undefined&&!PROGRAMMES.includes(s.programme))throw Error('Choose BAS, BID or BIFD.');if(!date(s.date)||(s.time&&!time(s.time))||!['PARTIAL','FINAL','OTHER'].includes(s.type)||typeof s.completed!=='boolean'||!str(s.course)||!str(s.description,4000)||!Number.isFinite(due(s,c)))throw Error('Invalid submission date, time, or fields.')}
-  for(const e of c.closures){if(!Number.isFinite(instant(e.start,c.timezone))||!Number.isFinite(instant(e.end,c.timezone))||instant(e.end,c.timezone)<=instant(e.start,c.timezone)||!Array.isArray(e.labs)||!e.labs.length||!e.labs.every(l=>LABS.includes(l))||!str(e.description,4000))throw Error('Choose affected labs and a reopening time after the closure starts.')}
+  for(const e of c.closures){if(e.kind!==undefined&&!['partial','full'].includes(e.kind))throw Error('Choose a partial or full closure.');if(e.kind==='full'&&(!e.start.endsWith('T00:00')||!e.end.endsWith('T00:00')))throw Error('Choose whole dates for a full closure.');if(!Number.isFinite(instant(e.start,c.timezone))||!Number.isFinite(instant(e.end,c.timezone))||instant(e.end,c.timezone)<=instant(e.start,c.timezone)||!Array.isArray(e.labs)||!e.labs.length||!e.labs.every(l=>LABS.includes(l))||!str(e.description,4000))throw Error('Choose affected labs and a reopening time after the closure starts.')}
   for(const p of c.posters){if(!str(p.subtitle,200)||!str(p.body,1200)||!str(p.image,100)||!/^([a-zA-Z0-9-]+\.(png|jpeg|webp))?$/.test(p.image)||typeof p.enabled!=='boolean'||(p.start&&!Number.isFinite(instant(p.start,c.timezone)))||(p.end&&!Number.isFinite(instant(p.end,c.timezone)))||(p.start&&p.end&&instant(p.end,c.timezone)<=instant(p.start,c.timezone)))throw Error('Invalid poster dates or image.')}
   if(JSON.stringify(c).length>800000)throw Error('Backup is too large.');return c;
 }
@@ -87,3 +88,32 @@ export function submissionProgramme(s:Submission):Programme|undefined{if(s.progr
 export function screenProgrammes(s:ScreenSettings):Programme[]{return s.programmes||PROGRAMMES.filter(p=>p==='BIFD'?s.labs.includes('FASHION LAB'):s.labs.some(l=>l!=='FASHION LAB'))}
 export const splitSubmissions=(s:ScreenSettings)=>s.splitProgrammes??(s.labs.length===1&&s.labs[0]==='FAB LAB');
 export const displayDate=(date:string)=>date.split('-').reverse().join('/');
+
+// Saved closures without a kind retain their exact hours. Classify each date
+// against its regular opening window, including overlapping legacy closures.
+export function calendarClosure(c:Content,date:string,labs:readonly Lab[]):'full'|'partial'|null{
+ const weekday=(new Date(date+'T12:00Z').getUTCDay()+6)%7;
+ let partial=false;
+ for(const lab of labs){
+  if(c.closures.some(e=>e.kind==='full'&&e.labs.includes(lab)&&e.start<date+'T24:00'&&e.end>date+'T00:00'))return 'full';
+  const h=c.hours[lab][weekday];if(!h.enabled)continue;
+  const relevant=c.closures.filter(e=>e.labs.includes(lab)&&e.start<date+'T'+h.close&&e.end>date+'T'+h.open);
+  if(!relevant.length)continue;
+  if(relevant.some(e=>e.kind==='full')||openingWindows(lab,c,date).length===0)return 'full';
+  partial=true;
+ }
+ return partial?'partial':null;
+}
+export function closureKind(e:Closure,c:Content):'full'|'partial'{
+ if(e.kind)return e.kind;
+ // A legacy interval is full only when every scheduled opening window it
+ // touches is entirely covered; otherwise preserve it as an hourly closure.
+ let scheduled=false;
+ const start=e.start.slice(0,10),end=e.end.slice(0,10),dates=new Set([end,...Array.from({length:8},(_,i)=>shiftDate(start,i)).filter(d=>d<=end)]);
+ for(const date of dates){
+  const weekday=(new Date(date+'T12:00Z').getUTCDay()+6)%7;
+  for(const lab of e.labs){const h=c.hours[lab][weekday];if(!h.enabled||e.start>=date+'T'+h.close||e.end<=date+'T'+h.open)continue;scheduled=true;if(e.start>date+'T'+h.open||e.end<date+'T'+h.close)return 'partial'}
+ }
+ return scheduled?'full':'partial';
+}
+
