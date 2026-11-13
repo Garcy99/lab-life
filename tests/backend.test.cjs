@@ -98,7 +98,10 @@ async function main(){
  const content=model.sampleContent(),base=content.posters[0];
  content.posters=[{...base,id:'fab',image:'fab.png',labs:['FAB LAB']},{...base,id:'fashion',image:'fashion.png',labs:['FASHION LAB']}];content.appearance={...model.DEFAULT_APPEARANCE,logo:'logo.png'};
  content.closures=[{id:'partial',title:'Short maintenance',kind:'partial',start:'2026-11-16T08:30',end:'2026-11-16T10:00',labs:['FAB LAB'],description:''},{id:'full',title:'All-day maintenance',kind:'full',start:'2026-11-17T00:00',end:'2026-11-18T00:00',labs:['FAB LAB'],description:''}];
+ content.closures.push({id:'expired',title:'Past closure',start:'2000-01-01T09:00',end:'2000-01-01T12:00',labs:['FAB LAB'],description:''});
+ content.submissions.push({id:'expired-deadline',title:'Past submission',date:'2000-01-01',time:'23:59',type:'FINAL',course:'',description:'',completed:false});
  await call('board','PUT',{token:'member',body:{id,revision:1,content}});
+ eq(tables.ll_boards[0].content.submissions.some(s=>s.id==='expired-deadline'),false,'A stale publish cannot restore expired submissions');
  eq(tables.ll_boards[0].content.closures.map(e=>e.kind),['partial','full'],'Closure kinds survive the actual Edge save path');
  await call('board','PUT',{token:'member',body:{id,revision:2,content:{...content,closures:[{...content.closures[0],kind:'invalid'}]}},expected:400});
  await call('board','PUT',{token:'member',body:{id,revision:2,content:{...content,closures:[{...content.closures[0],kind:'full'}]}},expected:400});

@@ -1,5 +1,5 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.119.0';
-import {filterForScreen, sampleContent, validateContent, validateScreenSettings, type Content, type ScreenSettings} from '../_shared/model.ts';
+import {filterForScreen, pruneExpired, sampleContent, validateContent, validateScreenSettings, type Content, type ScreenSettings} from '../_shared/model.ts';
 
 const BUCKET='lab-life-media';
 const IMAGE=/^[a-zA-Z0-9-]+\.(png|jpeg|webp)$/;
@@ -8,7 +8,7 @@ type Screen={id:string;board_id:string;name:string;settings:ScreenSettings;token
 class ApiError extends Error {constructor(message:string,public status=400){super(message)}}
 const randomToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32)),x=>x.toString(16).padStart(2,'0')).join('');
 export async function hash(token:string){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token));return Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('')}
-const snapshot=(b:Board)=>({id:b.id,content:b.content,revision:b.revision,updatedAt:b.updated_at});
+const snapshot=(b:Board)=>({id:b.id,content:pruneExpired(b.content),revision:b.revision,updatedAt:b.updated_at});
 const profile=(s:Screen)=>({id:s.id,name:s.name,settings:s.settings,enabled:s.enabled,lastSeen:s.last_seen});
 const bearer=(req:Request)=>{const value=req.headers.get('authorization')||'';return value.startsWith('Bearer ')&&value.length<=10000?value.slice(7):''};
 const text=(value:unknown,max=100)=>{if(typeof value!=='string'||!value.trim()||value.trim().length>max)throw new ApiError('Enter a valid name.');return value.trim()};
@@ -64,7 +64,7 @@ export function createHandler(admin:any,frontend='https://garcy99.github.io/lab-
    if(req.method!=='GET'&&origin!==allowedOrigin)throw new ApiError('FORBIDDEN',403);
    if(route==='auth/config'&&req.method==='GET')return json({mode:'email'});
    if(route==='board'&&req.method==='GET'){const auth=id?await authorize(req,id):await ownBoard(req);return json({...snapshot(auth.board),owner:auth.user.owner,email:auth.user.email})}
-   if(route==='board'&&req.method==='PUT'){const input=await jsonBody(req),{board}=await authorize(req,input.id);if(!Number.isSafeInteger(input.revision)||input.revision<1||input.revision>=2147483647)throw new ApiError('Invalid revision.');const content=validate(()=>validateContent(input.content)),updated_at=new Date().toISOString();const rows=checked<Board[]>(await admin.from('ll_boards').update({content,updated_at,revision:input.revision+1}).eq('id',board.id).eq('revision',input.revision).select('*'));if(!rows.length)throw new ApiError('Someone else published changes. Reload the latest content before saving.',409);return json(snapshot(rows[0]))}
+   if(route==='board'&&req.method==='PUT'){const input=await jsonBody(req),{board}=await authorize(req,input.id);if(!Number.isSafeInteger(input.revision)||input.revision<1||input.revision>=2147483647)throw new ApiError('Invalid revision.');const content=validate(()=>pruneExpired(validateContent(input.content))),updated_at=new Date().toISOString();const rows=checked<Board[]>(await admin.from('ll_boards').update({content,updated_at,revision:input.revision+1}).eq('id',board.id).eq('revision',input.revision).select('*'));if(!rows.length)throw new ApiError('Someone else published changes. Reload the latest content before saving.',409);return json(snapshot(rows[0]))}
    if(route==='display'&&req.method==='GET'){const {board,screen}=await display(id,bearer(req),screenId);return json(screen?{...snapshot(board),content:filterForScreen(board.content,screen.settings),screen:profile(screen)}:snapshot(board))}
    if(route==='display'&&req.method==='POST'){const input=await jsonBody(req),{board,user:u}=await authorize(req,input.id);if(!u.owner)throw new ApiError('FORBIDDEN',403);const token=randomToken();checked(await admin.from('ll_boards').update({display_hash:await hash(token)}).eq('id',board.id));return json({token})}
    if(route==='screens'&&req.method==='GET'){await authorize(req,id);const screens=checked<Screen[]>(await admin.from('ll_screens').select('*').eq('board_id',id).order('name'));return json(screens.map(profile))}
@@ -87,3 +87,4 @@ const rawSecrets=JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')||'{}');
 const secret=rawSecrets.default||Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 const admin=createClient(Deno.env.get('SUPABASE_URL')!,secret,{auth:{persistSession:false,autoRefreshToken:false}});
 Deno.serve(createHandler(admin,Deno.env.get('LAB_FRONTEND_ORIGIN')||'https://garcy99.github.io/lab-life',Deno.env.get('LAB_OWNER_EMAIL')||''));
+

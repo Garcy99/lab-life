@@ -46,7 +46,7 @@ GitHub Pages está configurado para **GitHub Actions**. Cada push a `main` ejecu
 
 El backend se despliega por separado:
 
-1. Aplica `supabase/schema.sql` mediante una migración administrativa.
+1. Aplica `supabase/schema.sql` y después `supabase/auto-expiry.sql` mediante migraciones administrativas.
 2. Despliega `supabase/functions/lab-life-api/index.ts` incluyendo `_shared/model.ts`.
 3. Configura `verify_jwt = false`: el propio handler verifica las sesiones confirmadas y los tokens de pantalla. El gateway no puede exigir JWT a los tokens de visualización.
 4. El servicio usa exclusivamente credenciales administrativas integradas del entorno de Supabase. Nunca las pongas en variables `VITE_*`, en este repositorio o en el frontend.
@@ -77,3 +77,4 @@ Each submission can be assigned to BAS, BID or BIFD. Existing course labels cont
 In **Screens → Configure**, choose the programmes shown on that screen and whether to separate submissions into programme panels. Existing FabLab screens default to BAS/BID panels; Fashion defaults to a single BIFD feed. Building Tech can use either layout. Each screen can upload its own logo; an empty screen logo inherits the campus logo. Screen configuration saves immediately.
 
 Display headings use the selected laboratory names. Opening-hour columns include local dates in DD/MM/YYYY format. The calendar and legend are enlarged. Posters crossfade over 0.8 seconds; reduced-motion preferences disable the animation. Uploaded image changes retain the previous poster while the incoming image loads.
+

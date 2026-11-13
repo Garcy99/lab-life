@@ -89,6 +89,14 @@ export function screenProgrammes(s:ScreenSettings):Programme[]{return s.programm
 export const splitSubmissions=(s:ScreenSettings)=>s.splitProgrammes??(s.labs.length===1&&s.labs[0]==='FAB LAB');
 export const displayDate=(date:string)=>date.split('-').reverse().join('/');
 
+// Day deadlines survive until local midnight; hourly closures expire at their
+// exclusive end instant. Keep the original object when nothing has expired.
+export function pruneExpired(c:Content,now=Date.now()):Content{
+ const today=localParts(new Date(now),c.timezone).date;
+ const submissions=c.submissions.filter(s=>s.date>=today),closures=c.closures.filter(e=>instant(e.end,c.timezone)>now);
+ return submissions.length===c.submissions.length&&closures.length===c.closures.length?c:{...c,submissions,closures};
+}
+
 // Saved closures without a kind retain their exact hours. Classify each date
 // against its regular opening window, including overlapping legacy closures.
 export function calendarClosure(c:Content,date:string,labs:readonly Lab[]):'full'|'partial'|null{
