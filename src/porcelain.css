@@ -49,7 +49,8 @@
 .display-board.fitted-display.porcelain-display .mini-calendar>.minor-heading{color:#141414;font-weight:600;letter-spacing:0}
 .display-board.fitted-display.porcelain-display .mini-calendar>.minor-heading b,.display-board.fitted-display.porcelain-display .calendar-week{color:var(--porcelain-soft);font-weight:400}
 .display-board.fitted-display.porcelain-display .calendar-grid{gap:3px}
-.display-board.fitted-display.porcelain-display .calendar-day{border:0;border-radius:clamp(4px,.4vw,8px);background:transparent;box-shadow:none;position:relative;justify-content:center}
+.display-board.fitted-display.porcelain-display .calendar-day{border:0;border-radius:clamp(4px,.4vw,8px);background:transparent;box-shadow:none;position:relative;justify-content:center;container-type:size}
+.display-board.fitted-display.porcelain-display .calendar-day>span{width:min(90cqh,32px);height:min(90cqh,32px);max-height:none;flex-shrink:0}
 .display-board.fitted-display.porcelain-display .calendar-day.closed-day{background:var(--closed-day-color);box-shadow:none}
 .display-board.fitted-display.porcelain-display .calendar-day.partial-closure-day{background:var(--partial-closure-color);color:#141414;box-shadow:none}
 .display-board.fitted-display.porcelain-display .calendar-day.full-closure-day{background:var(--closure-color);color:#141414;box-shadow:none}
