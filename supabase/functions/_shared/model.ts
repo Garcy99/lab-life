@@ -5,16 +5,17 @@ export const PROGRAMMES = ['BAS','BID','BIFD'] as const;
 export type Programme=typeof PROGRAMMES[number];
 export type Submission = { id: string; title: string; date: string; time: string; type: 'PARTIAL'|'FINAL'|'OTHER'; course: string; programme?:Programme; completed: boolean; description: string; labs?: Lab[] };
 export type Closure = { id: string; title: string; start: string; end: string; labs: Lab[]; description: string; kind?:'partial'|'full' };
+export type HourAdjustment=Pick<Closure,'start'|'end'|'labs'>;
 export type Poster = { id: string; title: string; subtitle: string; body: string; image: string; start: string; end: string; enabled: boolean; labs?: Lab[] };
 export type Appearance = {buttonRadius:number;accent:'sky'|'navy';posterTone:'ice'|'navy';font:'sans'|'editorial'|'montserrat';tagline:string;logo:string;closureColor?:string;closedDayColor?:string};
 export const DEFAULT_APPEARANCE:Appearance={buttonRadius:12,accent:'navy',posterTone:'ice',font:'sans',tagline:'SPACE TO CREATE. ROOM TO GROW.',logo:'',closureColor:'#FDE8E7',closedDayColor:'#EEEEEE'};
 export type ScreenSettings={logo?:string;splitProgrammes?:boolean;programmes?:Programme[];labs:Lab[];layout:'balanced'|'information'|'poster';showSubmissions:boolean;showClosures:boolean;showCalendar:boolean;showLabStatus:boolean;textScale:'normal'|'large';rotation:number};
 export type ScreenProfile={id:string;name:string;settings:ScreenSettings;enabled:boolean;lastSeen:string|null};
 export const DEFAULT_SCREEN:ScreenSettings={labs:[...LABS],layout:'balanced',showSubmissions:true,showClosures:true,showCalendar:true,showLabStatus:true,textScale:'normal',rotation:15};
-export type Content = { version: 2; campus: string; timezone: string; rotation: number; defaults: {due: string; close: string; reopen: string}; hours: Record<Lab, Hours[]>; submissions: Submission[]; closures: Closure[]; posters: Poster[];appearance?:Appearance };
+export type Content = { version: 2; campus: string; timezone: string; rotation: number; defaults: {due: string; close: string; reopen: string}; hours: Record<Lab, Hours[]>; submissions: Submission[]; closures: Closure[]; posters: Poster[];hourAdjustments?:HourAdjustment[];appearance?:Appearance };
 export type Snapshot = {id: string; content: Content; revision: number; updatedAt: string; owner?: boolean; email?: string;screen?:ScreenProfile};
 export function validateScreenSettings(value:unknown):ScreenSettings {const s=structuredClone(value) as ScreenSettings;if(!s||!Array.isArray(s.labs)||!s.labs.length||!s.labs.every(l=>LABS.includes(l))||new Set(s.labs).size!==s.labs.length||!['balanced','information','poster'].includes(s.layout)||!['normal','large'].includes(s.textScale)||!Number.isInteger(s.rotation)||s.rotation<8||s.rotation>120||!['showSubmissions','showClosures','showCalendar','showLabStatus'].every(k=>typeof s[k as keyof ScreenSettings]==='boolean'))throw Error('Choose valid labs, layout, visibility and poster timing.');if(s.logo!==undefined&&(typeof s.logo!=='string'||!/^([a-zA-Z0-9-]+\.(png|jpeg|webp))?$/.test(s.logo)))throw Error('Choose a valid screen logo.');if(s.splitProgrammes!==undefined&&typeof s.splitProgrammes!=='boolean')throw Error('Choose a valid submission layout.');if(s.programmes!==undefined&&(!Array.isArray(s.programmes)||!s.programmes.length||s.programmes.some(p=>!PROGRAMMES.includes(p))||new Set(s.programmes).size!==s.programmes.length))throw Error('Choose at least one valid programme.');if(s.layout==='information'&&!s.showSubmissions&&!s.showClosures&&!s.showCalendar&&!s.showLabStatus)throw Error('Enable at least one information section.');return s}
-export function filterForScreen(content:Content,s:ScreenSettings):Content {const c=structuredClone(content);const relevant=(e:{labs?:Lab[]})=>!e.labs?.length||e.labs.some(l=>s.labs.includes(l));c.submissions=(s.showSubmissions||s.showCalendar)?c.submissions.filter(e=>relevant(e)&&(!submissionProgramme(e)||screenProgrammes(s).includes(submissionProgramme(e)!))):[];c.closures=s.showClosures||s.showLabStatus||s.showCalendar?c.closures.filter(e=>e.labs.some(l=>s.labs.includes(l))).map(e=>({...e,labs:e.labs.filter(l=>s.labs.includes(l))})):[];c.posters=c.posters.filter(relevant);if(s.logo)c.appearance={...DEFAULT_APPEARANCE,...c.appearance,logo:s.logo};c.rotation=s.rotation;return c}
+export function filterForScreen(content:Content,s:ScreenSettings):Content {const c=structuredClone(content);const relevant=(e:{labs?:Lab[]})=>!e.labs?.length||e.labs.some(l=>s.labs.includes(l));c.submissions=(s.showSubmissions||s.showCalendar)?c.submissions.filter(e=>relevant(e)&&(!submissionProgramme(e)||screenProgrammes(s).includes(submissionProgramme(e)!))):[];c.closures=s.showClosures||s.showLabStatus||s.showCalendar?c.closures.filter(e=>e.labs.some(l=>s.labs.includes(l))).map(e=>({...e,labs:e.labs.filter(l=>s.labs.includes(l))})):[];if(c.hourAdjustments)c.hourAdjustments=c.hourAdjustments.filter(e=>e.labs.some(l=>s.labs.includes(l))).map(e=>({...e,labs:e.labs.filter(l=>s.labs.includes(l))}));c.posters=c.posters.filter(relevant);if(s.logo)c.appearance={...DEFAULT_APPEARANCE,...c.appearance,logo:s.logo};c.rotation=s.rotation;return c}
 export function localParts(now = new Date(), timezone = 'Europe/Madrid') {
   const p = new Intl.DateTimeFormat('en-CA', {timeZone:timezone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now);
   const v=(s:string)=>p.find(x=>x.type===s)?.value||'';
@@ -65,6 +66,7 @@ export function validateContent(v:unknown):Content {
   for(const list of [c.submissions,c.closures,c.posters]){if(!Array.isArray(list)||list.length>500)throw Error('Each section supports up to 500 entries.');for(const e of list){if(!str(e.id,80)||!e.id||ids.has(e.id)||!str(e.title)||!e.title.trim())throw Error('Every item needs a unique ID and title.');ids.add(e.id)}}
   for(const s of c.submissions){if(s.programme!==undefined&&!PROGRAMMES.includes(s.programme))throw Error('Choose BAS, BID or BIFD.');if(!date(s.date)||(s.time&&!time(s.time))||!['PARTIAL','FINAL','OTHER'].includes(s.type)||typeof s.completed!=='boolean'||!str(s.course)||!str(s.description,4000)||!Number.isFinite(due(s,c)))throw Error('Invalid submission date, time, or fields.')}
   for(const e of c.closures){if(e.kind!==undefined&&!['partial','full'].includes(e.kind))throw Error('Choose a partial or full closure.');if(e.kind==='full'&&(!e.start.endsWith('T00:00')||!e.end.endsWith('T00:00')))throw Error('Choose whole dates for a full closure.');if(!Number.isFinite(instant(e.start,c.timezone))||!Number.isFinite(instant(e.end,c.timezone))||instant(e.end,c.timezone)<=instant(e.start,c.timezone)||!Array.isArray(e.labs)||!e.labs.length||!e.labs.every(l=>LABS.includes(l))||!str(e.description,4000))throw Error('Choose affected labs and a reopening time after the closure starts.')}
+  if(c.hourAdjustments!==undefined&&(!Array.isArray(c.hourAdjustments)||c.hourAdjustments.length>5000||c.hourAdjustments.some(e=>!e||!Number.isFinite(instant(e.start,c.timezone))||!Number.isFinite(instant(e.end,c.timezone))||instant(e.end,c.timezone)<=instant(e.start,c.timezone)||!Array.isArray(e.labs)||!e.labs.length||!e.labs.every(l=>LABS.includes(l))||new Set(e.labs).size!==e.labs.length)))throw Error('Invalid daily opening adjustment.');
   for(const p of c.posters){if(!str(p.subtitle,200)||!str(p.body,1200)||!str(p.image,100)||!/^([a-zA-Z0-9-]+\.(png|jpeg|webp))?$/.test(p.image)||typeof p.enabled!=='boolean'||(p.start&&!Number.isFinite(instant(p.start,c.timezone)))||(p.end&&!Number.isFinite(instant(p.end,c.timezone)))||(p.start&&p.end&&instant(p.end,c.timezone)<=instant(p.start,c.timezone)))throw Error('Invalid poster dates or image.')}
   if(JSON.stringify(c).length>800000)throw Error('Backup is too large.');return c;
 }
@@ -75,7 +77,7 @@ export function openingWindows(lab:Lab,c:Content,date:string):Hours[]{
  const weekday=(new Date(date+'T12:00Z').getUTCDay()+6)%7,h=c.hours[lab][weekday];if(!h.enabled)return [];
  const minutes=(t:string)=>Number(t.slice(0,2))*60+Number(t.slice(3,5));
  let windows=[[minutes(h.open),minutes(h.close)]];
- for(const closure of c.closures.filter(e=>e.labs.includes(lab)&&e.start<date+'T24:00'&&e.end>date+'T00:00')){
+ for(const closure of [...c.closures,...(c.hourAdjustments||[])].filter(e=>e.labs.includes(lab)&&e.start<date+'T24:00'&&e.end>date+'T00:00')){
   const start=closure.start.slice(0,10)<date?0:minutes(closure.start.slice(11)),end=closure.end.slice(0,10)>date?1440:minutes(closure.end.slice(11));
   windows=windows.flatMap(([a,b])=>end<=a||start>=b?[[a,b]]:[[a,Math.max(a,start)],[Math.min(b,end),b]].filter(([x,y])=>x<y));
  }
@@ -94,7 +96,16 @@ export const displayDate=(date:string)=>date.split('-').reverse().join('/');
 export function pruneExpired(c:Content,now=Date.now()):Content{
  const today=localParts(new Date(now),c.timezone).date;
  const submissions=c.submissions.filter(s=>s.date>=today),closures=c.closures.filter(e=>instant(e.end,c.timezone)>now);
- return submissions.length===c.submissions.length&&closures.length===c.closures.length?c:{...c,submissions,closures};
+ const key=(e:HourAdjustment)=>e.start+'|'+e.end+'|'+e.labs.join(',');
+ const adjustments=new Map<string,HourAdjustment>();
+ for(const e of [...(c.hourAdjustments||[]),...c.closures.filter(e=>instant(e.end,c.timezone)<=now)]){
+  if(e.end>today+'T00:00'&&instant(e.end,c.timezone)<=now)adjustments.set(key(e),{start:e.start,end:e.end,labs:e.labs});
+ }
+ const hourAdjustments=[...adjustments.keys()].sort().map(k=>adjustments.get(k)!);
+ const previous=c.hourAdjustments||[],same=previous.length===hourAdjustments.length&&previous.every((e,i)=>key(e)===key(hourAdjustments[i]));
+ if(submissions.length===c.submissions.length&&closures.length===c.closures.length&&same)return c;
+ const result={...c,submissions,closures};if(hourAdjustments.length)result.hourAdjustments=hourAdjustments;else delete result.hourAdjustments;
+ return result;
 }
 
 // Saved closures without a kind retain their exact hours. Classify each date

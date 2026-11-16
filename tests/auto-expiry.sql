@@ -17,3 +17,20 @@ end;
 $$;
 select 'PASS: local midnight, saved-hour independence, exclusive closure end, DST, stable order, unrelated data and idempotence' as result;
 
+do $$
+declare
+ source jsonb := '{"timezone":"Europe/Madrid","submissions":[],"closures":[{"id":"morning","title":"Morning","description":"Remove me","start":"2026-11-16T08:30","end":"2026-11-16T10:00","labs":["FAB LAB"]},{"id":"evening","start":"2026-11-16T18:00","end":"2026-11-16T20:30","labs":["FAB LAB"]}]}';
+ cleaned jsonb;
+begin
+ cleaned := lab_life_private.prune_expired(source,'2026-11-16T09:00:00Z');
+ if jsonb_array_length(cleaned->'closures')<>1 or cleaned->'hourAdjustments' <> '[{"start":"2026-11-16T08:30","end":"2026-11-16T10:00","labs":["FAB LAB"]}]'::jsonb then raise exception 'Morning opening effect was lost'; end if;
+ if cleaned::text like '%Remove me%' or cleaned::text like '%morning%' then raise exception 'Expired announcement metadata retained'; end if;
+ if lab_life_private.prune_expired(cleaned,'2026-11-16T09:00:00Z') <> cleaned then raise exception 'Adjustment duplication'; end if;
+ cleaned := lab_life_private.prune_expired(cleaned,'2026-11-16T20:00:00Z');
+ if jsonb_array_length(cleaned->'hourAdjustments')<>2 or cleaned->'closures'<>'[]'::jsonb then raise exception 'Evening effect was lost'; end if;
+ cleaned := lab_life_private.prune_expired(cleaned,'2026-11-16T23:00:00Z');
+ if cleaned ? 'hourAdjustments' then raise exception 'Daily adjustments survived next local day'; end if;
+end;
+$$;
+select 'PASS: morning and evening adjustments survive announcement expiry, disappear at midnight and deduplicate' as day_hours_result;
+

@@ -97,7 +97,8 @@ async function main(){
  await call('team?board='+id,'GET',{token:'member',expected:403});
  const content=model.sampleContent(),base=content.posters[0];
  content.posters=[{...base,id:'fab',image:'fab.png',labs:['FAB LAB']},{...base,id:'fashion',image:'fashion.png',labs:['FASHION LAB']}];content.appearance={...model.DEFAULT_APPEARANCE,logo:'logo.png'};
- content.closures=[{id:'partial',title:'Short maintenance',kind:'partial',start:'2026-11-16T08:30',end:'2026-11-16T10:00',labs:['FAB LAB'],description:''},{id:'full',title:'All-day maintenance',kind:'full',start:'2026-11-17T00:00',end:'2026-11-18T00:00',labs:['FAB LAB'],description:''}];
+ const fixtureDay=model.shiftDate(model.localParts().date,7),fixtureNext=model.shiftDate(fixtureDay,1),fixtureEnd=model.shiftDate(fixtureDay,2);
+ content.closures=[{id:'partial',title:'Short maintenance',kind:'partial',start:fixtureDay+'T08:30',end:fixtureDay+'T10:00',labs:['FAB LAB'],description:''},{id:'full',title:'All-day maintenance',kind:'full',start:fixtureNext+'T00:00',end:fixtureEnd+'T00:00',labs:['FAB LAB'],description:''}];
  content.closures.push({id:'expired',title:'Past closure',start:'2000-01-01T09:00',end:'2000-01-01T12:00',labs:['FAB LAB'],description:''});
  content.submissions.push({id:'expired-deadline',title:'Past submission',date:'2000-01-01',time:'23:59',type:'FINAL',course:'',description:'',completed:false});
  await call('board','PUT',{token:'member',body:{id,revision:1,content}});
