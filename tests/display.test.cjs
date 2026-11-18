@@ -35,5 +35,8 @@ console.log('PASS: Porcelain palette, no calendar legend, weekday full/partial c
 assert.doesNotMatch(todayMarkup,/display-brand|campus-logo|display-lab-title|countdown-note|FABRICATION · FASHION · BUILDING TECHNOLOGY/);assert.match(todayMarkup,/display-date/);assert.match(todayMarkup,/opening-lab/);assert.doesNotMatch(colouredCalendar,/has-submission|<i[ >]|Submission due|calendar-legend/);
 console.log('PASS: centred-header content without display branding, no repeated programme notes or left footer, calendar without submission markers.');
 assert.ok(fabMarkup.includes('ANNOUNCEMENTS'));assert.ok(!fabMarkup.includes('NEXT FABLAB CLOSURE'));
+assert.match(fabMarkup,/opening-widget today-hours/);assert.match(fabMarkup,/opening-widget tomorrow-hours/);
+assert.ok(fabMarkup.indexOf('next-submissions-card')>fabMarkup.indexOf('programme-BID'));
+assert.ok(fabMarkup.includes('fit-title-box'));
 const staleFixture={...deadlineFixture,submissions:[{...queue[0],id:'old',title:'Expired deadline must disappear',date:'2000-01-01'}],closures:[{id:'old-closure',title:'Expired closure must disappear',start:'2000-01-01T09:00',end:'2000-01-01T12:00',labs:['FAB LAB'],description:''}]};const staleMarkup=renderToStaticMarkup(React.createElement(Board,{content:staleFixture,id:'test',screenSettings:fabSettings}));assert.doesNotMatch(staleMarkup,/Expired deadline must disappear|Expired closure must disappear/);
 

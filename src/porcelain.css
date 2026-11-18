@@ -84,3 +84,35 @@
  .display-board.fitted-display.porcelain-display .countdowns{gap:var(--fit-gap)}
 }
 
+/* One shared two-line hours widget, with a tall deadline queue alongside it. */
+.display-board.fitted-display.porcelain-display .information{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.display-board.fitted-display.porcelain-display .lab-strip{grid-column:1;grid-row:1;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1.1fr) minmax(0,.9fr);background:#fff;border-radius:var(--porcelain-radius);padding:var(--widget-pad-block) var(--widget-pad-inline);box-shadow:0 4px 20px #14141404;gap:calc(var(--fit-gap)*.4)}
+.display-board.fitted-display.porcelain-display .opening-widget{display:grid;grid-template-columns:minmax(80px,.6fr) minmax(0,2.4fr);grid-template-rows:minmax(0,1fr);gap:var(--fit-gap);background:transparent;box-shadow:none;border-radius:0;padding:0}
+.display-board.fitted-display.porcelain-display .opening-widget.tomorrow-hours{border-top:1px solid var(--line);padding-top:calc(var(--fit-gap)*.4)}
+.display-board.fitted-display.porcelain-display .opening-heading{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px}
+.display-board.fitted-display.porcelain-display .opening-heading>span{font-size:clamp(11px,calc(var(--u)*.95),19px);color:#141414}
+.display-board.fitted-display.porcelain-display .opening-heading time{font-size:clamp(9px,calc(var(--u)*.7),14px)}
+.display-board.fitted-display.porcelain-display .opening-lab{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
+.display-board.fitted-display.porcelain-display .opening-lab h3{font-size:clamp(16px,calc(var(--u)*1.45),29px)}
+.display-board.fitted-display.porcelain-display .opening-lab>div{font-size:clamp(23px,calc(var(--u)*2.35),47px)}
+.display-board.fitted-display.porcelain-display .tomorrow-hours .opening-heading>span{font-size:clamp(10px,calc(var(--u)*.8),16px);font-weight:500;color:var(--porcelain-soft)}
+.display-board.fitted-display.porcelain-display .tomorrow-hours .opening-lab h3{font-size:clamp(14px,calc(var(--u)*1.2),24px);color:var(--porcelain-soft)}
+.display-board.fitted-display.porcelain-display .tomorrow-hours .opening-lab>div{font-size:clamp(19px,calc(var(--u)*1.9),38px);color:var(--porcelain-soft)}
+.display-board.fitted-display.porcelain-display .countdowns{grid-column:1;grid-row:2;grid-template-columns:repeat(var(--submission-columns),minmax(0,1fr));grid-template-rows:minmax(0,1fr)}
+.display-board.fitted-display.porcelain-display .next-submissions-card{grid-column:2;grid-row:1/span 2}
+.display-board.fitted-display.porcelain-display .lower-row{grid-column:1/-1;grid-row:3}
+.display-board.fitted-display.porcelain-display .information[data-submissions="false"] .lab-strip{grid-column:1/-1}
+.display-board.fitted-display.porcelain-display .programme-panel .countdown-inner{grid-template-columns:minmax(0,1fr) minmax(0,.38fr)}
+.display-board.fitted-display.porcelain-display .submission-copy{display:flex;flex-direction:column;justify-content:center;min-height:0;height:100%;gap:6px}
+.display-board.fitted-display.porcelain-display .submission-copy .event-type{flex-shrink:0;align-self:flex-start}
+.display-board.fitted-display.porcelain-display .submission-copy>p{flex-shrink:0;margin:0}
+.display-board.fitted-display.porcelain-display .fit-title-box{display:flex;align-items:center;flex:1;min-height:0;width:100%;overflow:visible}
+.display-board.fitted-display.porcelain-display .fit-title-box>h2,.display-board.fitted-display.porcelain-display .fit-title-box>h3{display:block;-webkit-line-clamp:unset;-webkit-box-orient:unset;white-space:normal;text-overflow:clip;overflow:visible;overflow-wrap:anywhere;max-height:none;margin:0;width:100%;line-height:1.18}
+.display-board.fitted-display.porcelain-display .fit-title-box>h2{font-size:clamp(16px,calc(var(--u)*1.65),33px)}
+.display-board.fitted-display.porcelain-display .next-submission-row>div{display:flex;flex-direction:column;min-height:0;height:100%;justify-content:center;gap:4px}
+.display-board.fitted-display.porcelain-display .next-submission-row .fit-title-box>h3{font-size:clamp(12px,calc(var(--u)*.9),18px)}
+.display-board.fitted-display.porcelain-display .next-submission-row small{flex-shrink:0;margin:0}
+.display-board.fitted-display.porcelain-display .next-submission-row{padding:6px 0}
+.display-board.fitted-display.porcelain-display[data-labs="2"] .opening-lab h3,.display-board.fitted-display.porcelain-display[data-labs="3"] .opening-lab h3{font-size:clamp(10px,calc(var(--u)*.9),18px)}
+.display-board.fitted-display.porcelain-display[data-labs="3"] .opening-labs{gap:2px}
+
