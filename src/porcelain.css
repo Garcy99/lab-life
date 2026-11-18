@@ -123,7 +123,8 @@
 .display-board.fitted-display.porcelain-display .display-date{justify-self:end;text-align:right;align-items:flex-end}
 .display-board.fitted-display.porcelain-display .display-date>b{justify-content:flex-end;font-size:clamp(16px,calc(var(--u)*1.8),36px);white-space:nowrap;gap:clamp(12px,2cqw,36px)}
 .display-board.fitted-display.porcelain-display .display-clock{font-size:inherit;letter-spacing:0;font-variant-numeric:tabular-nums}
-.display-board.fitted-display.porcelain-display .calendar-day>span.is-today{width:min(100cqh,42px);height:min(100cqh,42px)}
+.display-board.fitted-display.porcelain-display .calendar-day:has(>.is-today){overflow:visible;z-index:1}
+.display-board.fitted-display.porcelain-display .calendar-day>span.is-today{width:max(26px,1.9em);height:max(26px,1.9em)}
 .display-board.fitted-display.porcelain-display .closure-card,
 .display-board.fitted-display.porcelain-display .closure-card *{color:#141414;--closure-accent:#141414}
 .display-board.fitted-display.porcelain-display .closure-card .minor-heading,.display-board.fitted-display.porcelain-display .closure-card .closure-status,.display-board.fitted-display.porcelain-display .closure-card .closure-labs,.display-board.fitted-display.porcelain-display .closure-card .closure-dates>div>span{color:#141414}
@@ -132,7 +133,7 @@
 .display-board.fitted-display.porcelain-display.layout-balanced{--u:min(.78cqw,1.65cqh);--widget-pad-inline:clamp(12px,1.1cqw,22px);--widget-pad-block:clamp(10px,1.1cqh,20px)}
 .display-board.fitted-display.porcelain-display.layout-balanced.text-large{--u:min(.86cqw,1.8cqh)}
 .display-board.fitted-display.porcelain-display.layout-balanced .programme-panel .countdown-inner{grid-template-columns:minmax(0,1fr) minmax(56px,.42fr)}
-.display-board.fitted-display.porcelain-display.layout-balanced .countdown-figure strong{font-size:clamp(24px,calc(var(--u)*3),56px);letter-spacing:-1px}
+.display-board.fitted-display.porcelain-display.layout-balanced .countdown-figure strong{font-size:clamp(24px,calc(var(--u)*3),56px);letter-spacing:-1px;line-height:1.15}
 .display-board.fitted-display.porcelain-display.layout-balanced .opening-widget{grid-template-columns:minmax(62px,.6fr) minmax(0,2.4fr);gap:8px}
 .display-board.fitted-display.porcelain-display.layout-balanced .opening-lab{grid-template-columns:minmax(0,.8fr) minmax(0,2fr);gap:4px}
 .display-board.fitted-display.porcelain-display.layout-balanced .opening-lab>div{font-size:clamp(16px,calc(var(--u)*1.9),36px);letter-spacing:-.6px}
@@ -141,3 +142,5 @@
 .display-board.fitted-display.porcelain-display.layout-balanced .closure-dates{gap:6px}
 .display-board.fitted-display.porcelain-display.layout-balanced .closure-dates>div>strong{font-size:clamp(11px,calc(var(--u)*.9),18px)}
 .display-board.fitted-display.porcelain-display.layout-balanced .closure-dates>div>b{font-size:clamp(16px,calc(var(--u)*1.6),30px)}
+.display-board.fitted-display.porcelain-display .poster-panel.has-image .poster-slide>.poster-image{height:calc(100% - 28px);max-height:calc(100% - 28px)}
+.display-board.fitted-display.porcelain-display .poster-panel.has-image .poster-footer{position:absolute;bottom:0;left:0;right:0;height:28px;padding:6px 12px;background:#fff;color:#141414;align-items:center}
