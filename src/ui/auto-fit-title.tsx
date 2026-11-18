@@ -10,7 +10,7 @@ export default function AutoFitTitle({text,as='h2'}:{text:string;as?:'h2'|'h3'})
   const fit=()=>{
    if(disposed||container.clientWidth<1||container.clientHeight<1)return;
    el.style.removeProperty('font-size');
-   const max=parseFloat(getComputedStyle(el).fontSize),fits=()=>el.scrollWidth<=container.clientWidth+1&&el.scrollHeight<=container.clientHeight+1;
+   const max=parseFloat(getComputedStyle(el).fontSize),fits=()=>el.scrollWidth<=container.clientWidth&&el.scrollHeight<=container.clientHeight&&el.getBoundingClientRect().height<=container.getBoundingClientRect().height;
    if(fits())return;
    let low=1,high=max;
    for(let i=0;i<12;i++){const mid=(low+high)/2;el.style.fontSize=mid+'px';if(fits())low=mid;else high=mid}
